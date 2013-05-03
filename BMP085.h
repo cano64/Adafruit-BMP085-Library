@@ -48,13 +48,18 @@
 #define BMP085_READPRESSURECMD            0x34
 
 
-class Adafruit_BMP085 {
+class BMP085 {
  public:
-  Adafruit_BMP085();
-  boolean begin(uint8_t mode = BMP085_ULTRAHIGHRES);  // by default go highres
+  BMP085();
+  uint8_t begin(uint8_t mode = BMP085_ULTRAHIGHRES);  // by default go highres
+  
   float readTemperature(void);
+  int16_t readTemperature10C(void);
+  
   int32_t readPressure(void);
-  float readAltitude(float sealevelPressure = 101325); // std atmosphere
+  float readAltitude(int16_t sealevelPressure = 101325); // std atmosphere
+  int16_t readAltitudeDM(int16_t sealevelPressure = 101325); // std atmosphere
+  
   uint16_t readRawTemperature(void);
   uint32_t readRawPressure(void);
   
