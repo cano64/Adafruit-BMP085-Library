@@ -1,5 +1,5 @@
 #include <Wire.h>
-#include <Adafruit_BMP085.h>
+#include <BMP085.h>
 
 /*************************************************** 
   This is an example for the BMP085 Barometric Pressure & Temp Sensor
@@ -24,7 +24,7 @@
 // EOC is not used, it signifies an end of conversion
 // XCLR is a reset pin, also not used here
 
-Adafruit_BMP085 bmp;
+BMP085 bmp;
   
 void setup() {
   Serial.begin(9600);
@@ -49,6 +49,14 @@ void loop() {
     Serial.print(bmp.readAltitude());
     Serial.println(" meters");
 
+	//small and fast calculation
+    Serial.print("Altitude using fast approximate = ");
+    Serial.print(bmp.readAltitudeSTDmm());
+    Serial.println(" mm");
+
+
+
+
   // you can get a more precise measurement of altitude
   // if you know the current sea level pressure which will
   // vary with weather and such. If it is 1015 millibars
@@ -57,6 +65,13 @@ void loop() {
     Serial.print(bmp.readAltitude(101500));
     Serial.println(" meters");
     
+	//version without pow() function
+    Serial.print("No pow() real altitude approximate = ");
+    Serial.print(bmp.readAltitudemm(101500));
+    Serial.println(" mm");
+
+
+
     Serial.println();
     delay(500);
 }

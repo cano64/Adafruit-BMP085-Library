@@ -1,37 +1,37 @@
 /*************************************************** 
-  This is a library for the BMP085 Barometric Pressure & Temp Sensor
-
-  Designed specifically to work with the Adafruit BMP085 Breakout 
-  ----> https://www.adafruit.com/products/391
-
-  These displays use I2C to communicate, 2 pins are required to  
-  interface
-  Adafruit invests time and resources providing this open source code, 
-  please support Adafruit and open-source hardware by purchasing 
-  products from Adafruit!
-
-  Written by Limor Fried/Ladyada for Adafruit Industries.  
-  BSD license, all text above must be included in any redistribution
-  
-  -------------------------------------------------------------------
-  
-  Improved by Michal Canecky/Cano 2013-05-01
-  -mess clean up
-  -optimized calculations
-  -calculation of altitude without use of pow() function and math library thus
-  -minimized sketch size
-  
-  sensor datasheet:
-  http://media.digikey.com/pdf/Data%20Sheets/Bosch/BMP085.pdf
-  
-  
-  
+ * This is a library for the BMP085 Barometric Pressure & Temp Sensor
+ * 
+ * Designed specifically to work with the Adafruit BMP085 Breakout 
+ * ----> https://www.adafruit.com/products/391
+ * 
+ * These displays use I2C to communicate, 2 pins are required to  
+ * interface
+ * Adafruit invests time and resources providing this open source code, 
+ * please support Adafruit and open-source hardware by purchasing 
+ * products from Adafruit!
+ * 
+ * Written by Limor Fried/Ladyada for Adafruit Industries.  
+ * BSD license, all text above must be included in any redistribution
+ * 
+ * -------------------------------------------------------------------
+ * 
+ * Improved by Michal Canecky/Cano 2013-05-01
+ * -mess clean up
+ * -optimized calculations
+ * -calculation of altitude without use of pow() function and math library thus
+ * -minimized sketch size
+ * 
+ * sensor datasheet:
+ * http://media.digikey.com/pdf/Data%20Sheets/Bosch/BMP085.pdf
+ * 
+ * 
+ * 
  ****************************************************/
 
 #if (ARDUINO >= 100)
- #include "Arduino.h"
+#include "Arduino.h"
 #else
- #include "WProgram.h"
+#include "WProgram.h"
 #endif
 #include "Wire.h"
 
@@ -63,30 +63,31 @@
 
 
 class BMP085 {
- public:
-  BMP085();
-  uint8_t begin(uint8_t mode = BMP085_ULTRAHIGHRES);  // by default go highres
-  
-  float readTemperature(void);
-  int16_t readTemperature10C(void);
-  
-  int32_t readPressure(void);
-  float readAltitude(int32_t sealevelPressure = 101325); // std atmosphere by default
-  int32_t readAltitudemm(int32_t sealevelPressure = 101325); // std atmosphere by default
-  int32_t readAltitudeSTDmm(); // std atmosphere, fast approximation using only ints
-  
-  uint16_t readRawTemperature(void);
-  uint32_t readRawPressure(void);
-  
- private:
- 
-  uint8_t read8(uint8_t addr);
-  uint16_t read16(uint8_t addr);
-  void write8(uint8_t addr, uint8_t data);
+public:
+    BMP085();
+    uint8_t begin(uint8_t mode = BMP085_ULTRAHIGHRES);  // by default go highres
 
-  uint8_t oversampling;
+    float readTemperature(void);
+    int16_t readTemperature10C(void);
 
-  int16_t ac1, ac2, ac3, b1, b2, mb, mc, md;
-  uint16_t ac4, ac5, ac6;
+    int32_t readPressure(void);
+    float readAltitude(int32_t sealevelPressure = 101325); // std atmosphere by default
+    int32_t readAltitudemm(int32_t sealevelPressure = 101325); // std atmosphere by default
+    int32_t readAltitudeSTDmm(); // std atmosphere, fast approximation using only ints
+
+    uint16_t readRawTemperature(void);
+    uint32_t readRawPressure(void);
+
+private:
+
+    uint8_t read8(uint8_t addr);
+    uint16_t read16(uint8_t addr);
+    void write8(uint8_t addr, uint8_t data);
+
+    uint8_t oversampling;
+
+    int16_t ac1, ac2, ac3, b1, b2, mb, mc, md;
+    uint16_t ac4, ac5, ac6;
 };
+
 
