@@ -18,7 +18,7 @@
  * Improved by Michal Canecky/Cano 2013-05-01
  * -mess clean up
  * -optimized calculations
- * -calculation of altitude without use of pow() function and floats thus
+ * -calculation of altitude without use of pow() function and math library thus
  * -minimized sketch size
  * 
  * sensor datasheet:
@@ -117,8 +117,7 @@ int32_t BMP085::readPressure(void) {
 
     if (B7 < 0x80000000) {
         p = (B7 << 1) / B4;
-    } 
-    else {
+    } else {
         p = (B7 / B4) << 1;
     }
     X1 = (p >> 8) * (p >> 8);
@@ -131,7 +130,7 @@ int32_t BMP085::readPressure(void) {
 
 //return temperature in C
 float BMP085::readTemperature(void) {
-    return readTemperature10C()/10;
+    return readTemperature10C() / 10.0;
 }
 
 //return temperature in 0.1C
@@ -147,25 +146,23 @@ int16_t BMP085::readTemperature10C(void) {
 }
 
 //return altitude in meters
-float BMP085::readAltitude(int16_t sealevelPressure) {
-    float altitude;
-
-    int32_t pressure = readPressure();
-
-    altitude = 44330 * (1.0 - pow(pressure / sealevelPressure, 1.0 / 5.255));
-
+float BMP085::readAltitude(int32_t sealevelPressure) {
+    float pressure = readPressure();
+    float altitude = 44330 * (1.0 - pow(pressure / sealevelPressure, 1.0 / 5.255));
     return altitude;
 }
 
-//return altitude in deci meters, approximation using Taylor series
-int16_t BMP085::readAltitudeDM(int16_t sealevelPressure) {
-    int16_t altitude;
+// return altitude in mili meters, approximation using Taylor series
+// by not using pow() we will save about 1200 bytes of sketch size 
+int32_t BMP085::readAltitudemm(int32_t sealevelPressure) {
 
-    //Taylor series for sealevelPressure = 101325
-    //-0.0832546 (x-101325)+3.32651x10^-7 (x-101325)^2-1.98043x10^-12 (x-101325)^3+1.37291x10^-17 (x-101325)^4-1.0324x10^-22 (x-101325)^5+8.16767x10^-28 (x-101325)^6+O((x-101325)^7)
+	//TODO get rid of floats as well
 
-
-    //Taylor Series at x = pressure = 101325, a = sealevelPressure 
+    int32_t pressure = readPressure();
+    // convert this [altitude = 44330 * (1.0 - pow(pressure / sealevelPressure, 1.0 / 5.255))] into Taylor Series
+	// http://en.wikipedia.org/wiki/Taylor_series
+	
+    //Taylor Series at x = pressure = 101325, (a = sealevelPressure)
     //(44330.-397430. (1/a)^0.190295)-0.746399 (1/a)^0.190295 (x-101325)+2.9823x10^-6 (1/a)^0.190295 (x-101325)^2-1.7755x10^-11 (1/a)^0.190295 (x-101325)^3+1.23085x10^-16 (1/a)^0.190295 (x-101325)^4-9.25572x10^-22 (1/a)^0.190295 (x-101325)^5+O((x-101325)^6)
 
     //substitute b = (1/a) ^ 0.19029495718363463368220742150333
@@ -174,21 +171,72 @@ int16_t BMP085::readAltitudeDM(int16_t sealevelPressure) {
 
     int32_t ax1 = sealevelPressure - 101325;
     int32_t ax2 = ax1 * ax1;
-    int32_t ax3 = ax2 * ax1;
+//    int32_t ax3 = ax2 * ax1;
 
-    float b = 0.111542 - 2.09483E-7 * ax1 + 1.23043E-12 * ax2 - 8.86586E-18 * ax3;
+//	Serial.println(ax1);
+//	Serial.println(ax2);
+//	Serial.println(ax3);
+
+    float b = 0.111542;
+//	Serial.println(b, 10);
+    b += -2.09483E-7 * (float)ax1;
+//	Serial.println(b, 10);
+    b += 1.23043E-12 * (float)ax2;
+//	Serial.println(b, 10);
+    //b += -8.86586E-18 * (float)ax3;
+    
+    //b = 0.1113241531; //value for standard pressure
 
 
-    int32_t pressure = readPressure();
     int32_t px1 = pressure - 101325;
     int32_t px2 = px1 * px1;
-    int32_t px3 = px2 * px1;
+//    int32_t px3 = px2 * px1;
+    
 
-    altitude = 44330 -397430 * b - 0.746399 * b * px1 + 2.9823E-6 * b * px2 - 1.7755E-11 * b * px3;
+    int32_t altitude = 1000.0 * (44330 - 397430 * b  - 0.746399 * b * px1  + 2.9823E-6 * b * px2 /*- 1.7755E-11 * b * px3*/);
 
+    //Taylor series for sealevelPressure = 101325
+    //-0.0832546 (x-101325)+3.32651x10^-7 (x-101325)^2-1.98043x10^-12 (x-101325)^3+1.37291x10^-17 (x-101325)^4-1.0324x10^-22 (x-101325)^5+8.16767x10^-28 (x-101325)^6+O((x-101325)^7)
     //  altitude = -0.0832546 * px1 + 3.32651E-7 * px2 - 1.98043E-12 *px3; //estimate for sealevelPressure = 101325
 
-    return (int16_t)(altitude *10);
+    return altitude;
+    
+/*
+
+	Comparison of accuracy using pow() vs Taylor series
+	There is no difference using 2 of 3 terms, so we will use just first 2
+	Taylor series is centered at the sea level, because I live at the sea level :P
+	
+	pow(), Taylor (#of terms for b, altitude) pressure
+
+	-214.51 meters -218.497m (1,1) p=105000
+	-214.51 meters -214.548m (2,2) p=105000
+	197.16 meters 196.959m (1,1) p=10000
+	197.16 meters 197.012m (2,2) p=100000
+	1073.19 meters 1027.873m (1,1) p=90000
+	1073.19 meters 1069.935m (2,2) p=90000
+	2031.94 meters 2009.258m (2,2) p=80000
+	3093.21 meters 3014.982m (2,2) p=70000
+	3093.21 meters 3014.983m (3,3) p=70000
+	4285.28 meters 4087.107m (3,3) p=60000
+	4285.28 meters 4087.107m (2,2) p=60000
+	7258.86 meters 5004.616m (2,2) p=40000
+	11839.87 meters 6187.728m (2,2) p=20000
+	44330.00 meters 9062.383m (2,2) p=0
+
+*/
+    
+    
+}
+
+// return altitude in milimetes based on standard pressure at sea level
+// this is the function you will normally use for altitude readings unless you 
+// want to check weather report sea level presssure for your area every time you want to use the device
+// uncalibrated altitude reading may be off 100 meters, depending if it's sunny or raining
+
+int32_t BMP085::readAltitudeSTDmm(void) {
+	//TODO fast calculation only using ints
+	return readAltitudemm(); //placeholder
 }
 
 /*********************************************************************/
@@ -200,12 +248,12 @@ uint8_t BMP085::read8(uint8_t a) {
     Wire.write(a); // sends register address to read from
     Wire.endTransmission(); // end transmission
 
-        Wire.beginTransmission(BMP085_I2CADDR); // start transmission to device 
+    Wire.beginTransmission(BMP085_I2CADDR); // start transmission to device 
     Wire.requestFrom(BMP085_I2CADDR, 1);// send data n-bytes read
     ret = Wire.read(); // receive DATA
     Wire.endTransmission(); // end transmission
 
-        return ret;
+    return ret;
 }
 
 uint16_t BMP085::read16(uint8_t a) {
@@ -215,14 +263,14 @@ uint16_t BMP085::read16(uint8_t a) {
     Wire.write(a); // sends register address to read from
     Wire.endTransmission(); // end transmission
 
-        Wire.beginTransmission(BMP085_I2CADDR); // start transmission to device 
+    Wire.beginTransmission(BMP085_I2CADDR); // start transmission to device 
     Wire.requestFrom(BMP085_I2CADDR, 2);// send data n-bytes read
     ret = Wire.read(); // receive DATA
     ret <<= 8;
     ret |= Wire.read(); // receive DATA
     Wire.endTransmission(); // end transmission
 
-        return ret;
+    return ret;
 }
 
 void BMP085::write8(uint8_t a, uint8_t d) {

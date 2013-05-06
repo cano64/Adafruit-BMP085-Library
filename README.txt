@@ -1,22 +1,15 @@
-This is a library for the Adafruit BMP085 Barometric Pressure + Temp sensor
+This is an Arduino library for BMP085 Barometric Pressure and Temperaure sensor.
+Written by Michal Canecky/Cano based on library by Adafruit with some improvements.
 
-Designed specifically to work with the Adafruit BMP085 Breakout 
-  ----> https://www.adafruit.com/products/391
+This library is calculating altitudes without using pow() function and math library 
+thus minimizing sketch size by about 1200 bytes.
 
-These displays use I2C to communicate, 2 pins are required to interface
-Adafruit invests time and resources providing this open source code, 
-please support Adafruit and open-source hardware by purchasing 
-products from Adafruit!
+Uncalibrated (standard sea level pressure) function for calculating altitude
+without using floats -is- will be available as well saving another 1100 bytes of sketch size
 
-Check out the links above for our tutorials and wiring diagrams 
+int32_t readAltitudeSTDmm() is the function you would normally use, 
+but your reading may be off about 100 meters based on weather, whether is sunny or raining
 
-Adafruit invests time and resources providing this open source code, 
-please support Adafruit and open-source hardware by purchasing 
-products from Adafruit!
+BMP085 requires I2C (two wire) communication.
 
-Written by Limor Fried/Ladyada for Adafruit Industries.  
-BSD license, all text above must be included in any redistribution
 
-To download. click the DOWNLOADS button in the top right corner, rename the uncompressed folder Adafruit_BMP085. Check that the Adafruit_BMP085 folder contains Adafruit_BMP085.cpp and Adafruit_BMP085.h
-
-Place the Adafruit_BMP085 library folder your <arduinosketchfolder>/libraries/ folder. You may need to create the libraries subfolder if its your first library. Restart the IDE.

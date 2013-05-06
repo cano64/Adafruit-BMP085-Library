@@ -18,7 +18,7 @@
   Improved by Michal Canecky/Cano 2013-05-01
   -mess clean up
   -optimized calculations
-  -calculation of altitude without use of pow() function and floats thus
+  -calculation of altitude without use of pow() function and math library thus
   -minimized sketch size
   
   sensor datasheet:
@@ -71,13 +71,15 @@ class BMP085 {
   int16_t readTemperature10C(void);
   
   int32_t readPressure(void);
-  float readAltitude(int16_t sealevelPressure = 101325); // std atmosphere
-  int16_t readAltitudeDM(int16_t sealevelPressure = 101325); // std atmosphere
+  float readAltitude(int32_t sealevelPressure = 101325); // std atmosphere by default
+  int32_t readAltitudemm(int32_t sealevelPressure = 101325); // std atmosphere by default
+  int32_t readAltitudeSTDmm(); // std atmosphere, fast approximation using only ints
   
   uint16_t readRawTemperature(void);
   uint32_t readRawPressure(void);
   
  private:
+ 
   uint8_t read8(uint8_t addr);
   uint16_t read16(uint8_t addr);
   void write8(uint8_t addr, uint8_t data);
