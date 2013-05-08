@@ -35,6 +35,8 @@
 #endif
 #include "Wire.h"
 
+#define ALTITUDE_EXTRA_PRECISSION 1
+
 #define BMP085_DEBUG 0
 
 #define BMP085_I2CADDR 0x77
