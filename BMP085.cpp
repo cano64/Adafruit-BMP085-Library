@@ -185,8 +185,6 @@ int32_t BMP085::readAltitudemm(int32_t sealevelPressure) {
 }
 
 // return altitude in milimetes based on standard pressure at sea level
-// this is the function you will normally use for altitude readings unless you 
-// want to check weather report sea level presssure for your area every time you want to use the device
 // uncalibrated altitude reading may be offset 100 meters, depending if it's sunny or raining
 
 int32_t BMP085::readAltitudeSTDmm(void) {
@@ -204,6 +202,37 @@ int32_t BMP085::readAltitudeSTDmm(void) {
 	altitude += (moo >> 12) + (moo >> 17) + (moo >> 18); //1st term, extra precission
 	altitude += (moo364 >> 11) + (moo364 >> 13) + (moo364 >> 17) + (moo364 >> 18) + (moo364 >> 21); //3rd term for extra precission
 #endif
+
+    return altitude;
+}
+
+
+/*
+return altitude in decimeters based on standard sea level pressure as 16 bit integer
+for super duper low memory footprint, if you need to store a lot of data in RAM
+but your altitude will be limited to about 3.2km
+
+Comparison of  accuracy of this method to using precise calculation using pow()
+
+pressure    pow()     this      difference
+
+105005 Pa		-301 m		-299 m		2.9 m
+100010 Pa		110 m 		110 m 		0.4 m
+95015 Pa		539 m 		539 m 		0.0 m
+90020 Pa		986 m 		986 m 		-0.2 m
+85025 Pa		1455 m		1453 m		-1.9 m
+80030 Pa		1946 m		1938 m		-7.4 m
+75035 Pa		2462 m		2443 m		-19.2 m
+70040 Pa		3008 m		2967 m		-40.8 m
+above that, int16 overflows
+*/
+
+int16_t BMP085::readAltitudeSTDdm(void) {
+    int32_t pressure = readPressure();
+    int32_t moo = (int32_t)95000 - pressure;
+    int16_t altitude = 5404; //0th term
+    altitude += ((28742 * moo) >> 15); //1st term
+    altitude += ((moo * moo) >> 18); //2nd term
 
     return altitude;
 }
