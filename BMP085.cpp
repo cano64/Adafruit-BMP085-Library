@@ -225,14 +225,26 @@ pressure    pow()     this      difference
 75035 Pa		2462 m		2443 m		-19.2 m
 70040 Pa		3008 m		2967 m		-40.8 m
 above that, int16 overflows
+
 */
 
 int16_t BMP085::readAltitudeSTDdm(void) {
     int32_t pressure = readPressure();
     int32_t moo = (int32_t)95000 - pressure;
-    int16_t altitude = 5404; //0th term
-    altitude += ((28742 * moo) >> 15); //1st term
-    altitude += ((moo * moo) >> 18); //2nd term
+    int16_t altitude = 5404;
+    altitude += ((28742 * moo) >> 15);
+    altitude += ((moo * moo) >> 18);
+
+    return altitude;
+}
+
+
+uint16_t BMP085::readAltitudeSTDdm2(void) {
+    int32_t pressure = readPressure();
+    int32_t moo = (int32_t)95000 - pressure;
+    uint16_t altitude = 5404;
+    altitude += ((28742 * moo) >> 15);
+    altitude += ((moo * moo) >> 18);
 
     return altitude;
 }

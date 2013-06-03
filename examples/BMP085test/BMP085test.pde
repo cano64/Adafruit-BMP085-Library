@@ -51,8 +51,8 @@ void loop() {
 
 	//small and fast calculation
     Serial.print("Altitude using fast approximate = ");
-    Serial.print(bmp.readAltitudeSTDmm());
-    Serial.println(" mm");
+    Serial.print(bmp.readAltitudeSTDdm());
+    Serial.println(" dm");
 
 
 

@@ -4,4 +4,6 @@ readTemperature10C	KEYWORD2
 readAltitude	KEYWORD2
 readAltitudemm	KEYWORD2
 readAltitudeSTDmm	KEYWORD2
+readAltitudeSTDdm	KEYWORD2
+readAltitudeSTDdm2	KEYWORD2
 
