@@ -70,15 +70,15 @@ uint32_t BMP085::readRawPressure(void) {
 
     write8(BMP085_CONTROL, BMP085_READPRESSURECMD + (oversampling << 6));
 
-    if (oversampling == BMP085_ULTRALOWPOWER) 
-        _delay_ms(5);
-    else if (oversampling == BMP085_STANDARD) 
-        _delay_ms(8);
-    else if (oversampling == BMP085_HIGHRES) 
-        _delay_ms(14);
-    else 
-        _delay_ms(26);
-
+    if (oversampling == BMP085_ULTRALOWPOWER) {
+      delay(5);
+    } else if (oversampling == BMP085_STANDARD) {
+      delay(8);
+    } else if (oversampling == BMP085_HIGHRES) {
+      delay(14);
+    } else {
+      delay(26);
+    }
     raw = read16(BMP085_PRESSUREDATA);
 
     raw <<= 8;
@@ -143,6 +143,18 @@ int16_t BMP085::readTemperature10C(void) {
     X2 = ((int32_t)mc << 11) / (X1 + (int32_t)md);
     B5 = X1 + X2;
     return (B5 + 8) >> 4;
+}
+
+//return temperature in 0.01C
+int16_t BMP085::readTemperature100C(void) {
+    int32_t UT, X1, X2, B5;     // following ds convention
+
+    UT = readRawTemperature();
+
+    X1 = ((UT - (int32_t)ac6) * ((int32_t)ac5)) >> 15;
+    X2 = ((int32_t)mc << 11) / (X1 + (int32_t)md);
+    B5 = X1 + X2;
+    return (B5 >> 1) + (B5 >> 3);
 }
 
 //return altitude in meters

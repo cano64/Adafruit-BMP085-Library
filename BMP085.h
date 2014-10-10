@@ -71,6 +71,7 @@ public:
 
     float readTemperature(void);
     int16_t readTemperature10C(void);
+    int16_t readTemperature100C(void);
 
     int32_t readPressure(void);
     float readAltitude(int32_t sealevelPressure = 101325); // std atmosphere by default

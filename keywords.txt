@@ -1,4 +1,4 @@
-tinyBMP085	KEYWORD1
+BMP085	KEYWORD1
 readPressure	KEYWORD2
 readTemperature10C	KEYWORD2
 readAltitude	KEYWORD2
